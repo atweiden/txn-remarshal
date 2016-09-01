@@ -1,0 +1,71 @@
+#!/usr/bin/env perl6
+
+
+
+
+use v6;
+use TXN::Remarshal;
+
+
+
+
+# -----------------------------------------------------------------------------
+# main
+# -----------------------------------------------------------------------------
+
+sub MAIN(
+    Str :i(:$input),
+    Str :if(:$input-format),
+    Str :o(:$output),
+    Str :of(:$output-format)
+)
+{
+    say 'i: ', $input;
+    say 'if: ', $input-format;
+    say 'o: ', $output;
+    say 'of: ', $output-format;
+}
+
+
+
+
+# -----------------------------------------------------------------------------
+# usage
+# -----------------------------------------------------------------------------
+
+sub USAGE()
+{
+    constant $HELP = q:to/EOF/;
+    Usage:
+      txn-remarshal [-i=<file>] [-o=<file>] -if=<format> -of=<format>
+
+    Options:
+      -h, --help
+        print this help message
+      -i, --input=<file>
+        the input source
+      -o, --output=<file>
+        the output destination
+      -if, --input-format=<format>
+        the input file format
+      -of, --output-format=<format>
+        the output file format
+
+    Files:
+      /path/to/file
+        absolute path to input/output file
+      path/to/file
+        relative path to input/output file
+      -
+        stdin/stdout
+
+    Formats:
+      json
+        JSON
+      txn
+        TXN
+    EOF
+    say $HELP.trim;
+}
+
+# vim: set filetype=perl6 foldmethod=marker foldlevel=0:

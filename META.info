@@ -3,7 +3,7 @@
     "version"     : "*",
     "author"      : "Andy Weidenbaum",
     "description" : "Double-entry accounting ledger file format converter",
-    "depends"     : ["TXN::Parser"],
+    "depends"     : ["File::Presence", "TXN::Parser"],
     "license"     : "http://unlicense.org/UNLICENSE",
     "source-type" : "git",
     "source-url"  : "git://github.com/atweiden/txn-remarshal.git",

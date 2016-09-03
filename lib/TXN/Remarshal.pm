@@ -131,7 +131,7 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Account $account) returns Str
 
 multi sub to-txn(TXN::Parser::AST::Entry::Posting::Amount $amount) returns Str
 {
-    my AssetCode $asset-code = $amount.asset-code;
+    my Str $asset-code = $amount.asset-code;
     my Quantity $asset-quantity = $amount.asset-quantity;
     my AssetSymbol $asset-symbol = $amount.asset-symbol if $amount.asset-symbol;
     my PlusMinus $plus-or-minus = $amount.plus-or-minus if $amount.plus-or-minus;
@@ -171,7 +171,7 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot $annot) returns Str
 
 multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Inherit $inherit) returns Str
 {
-    my AssetCode $asset-code = $inherit.asset-code;
+    my Str $asset-code = $inherit.asset-code;
     my Quantity $asset-quantity = $inherit.asset-quantity;
     my AssetSymbol $asset-symbol = $inherit.asset-symbol if $inherit.asset-symbol;
 
@@ -211,7 +211,7 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Lot $lot) returns Str
 
 multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::XE $xe) returns Str
 {
-    my AssetCode $asset-code = $xe.asset-code;
+    my Str $asset-code = $xe.asset-code;
     my Quantity $asset-quantity = $xe.asset-quantity;
     my AssetSymbol $asset-symbol = $xe.asset-symbol if $xe.asset-symbol;
 

@@ -3,6 +3,159 @@ use TXN::Parser;
 use TXN::Parser::Types;
 unit module TXN::Remarshal;
 
+# remarshal {{{
+
+# --- format {{{
+
+subset Format of Str where /ENTRY|HASH|JSON|TXN/;
+multi sub gen-format('entry') returns Format { 'ENTRY' }
+multi sub gen-format('hash') returns Format { 'HASH' }
+multi sub gen-format('json') returns Format { 'JSON' }
+multi sub gen-format('txn') returns Format { 'TXN' }
+
+# --- end format }}}
+
+multi sub remarshal(
+    $input,
+    Str :if(:$input-format),
+    Str :of(:$output-format)
+) is export
+{
+    my Format $if = gen-format($input-format);
+    my Format $of = gen-format($output-format);
+    remarshal($input, $if, $of);
+}
+
+# ------------------------------------------------------------------------------
+# --- no conversion required {{{
+
+multi sub remarshal($input, 'ENTRY', 'ENTRY') { $input }
+multi sub remarshal($input, 'HASH', 'HASH') { $input }
+multi sub remarshal($input, 'JSON', 'JSON') { $input }
+multi sub remarshal($input, 'TXN', 'TXN') { $input }
+
+# --- end no conversion required }}}
+# ------------------------------------------------------------------------------
+# --- txn ↔ entry {{{
+
+multi sub remarshal(Str $txn, 'TXN', 'ENTRY') returns Array
+{
+    my TXN::Parser::AST::Entry @entry = from-txn($txn);
+}
+
+multi sub remarshal(TXN::Parser::AST::Entry @entry, 'ENTRY', 'TXN') returns Str
+{
+    my Str $txn = to-txn(@entry);
+}
+
+multi sub remarshal(TXN::Parser::AST::Entry $entry, 'ENTRY', 'TXN') returns Str
+{
+    my Str $txn = to-txn($entry);
+}
+
+# --- end txn ↔ entry }}}
+# --- entry ↔ hash {{{
+
+multi sub remarshal(
+    TXN::Parser::AST::Entry @entry,
+    'ENTRY',
+    'HASH'
+) returns Array
+{
+    my @e = to-hash(@entry);
+}
+
+multi sub remarshal(
+    TXN::Parser::AST::Entry $entry,
+    'ENTRY',
+    'HASH'
+) returns Hash
+{
+    my %e = to-hash($entry);
+}
+
+multi sub remarshal(@e, 'HASH', 'ENTRY') returns Array
+{
+    my TXN::Parser::AST::Entry @entry = from-hash(:entry(@e));
+}
+
+multi sub remarshal(%e, 'HASH', 'ENTRY') returns TXN::Parser::AST::Entry
+{
+    my TXN::Parser::AST::Entry $entry = from-hash(:entry(%e));
+}
+
+# --- end entry ↔ hash }}}
+# --- hash ↔ json {{{
+
+multi sub remarshal(@e, 'HASH', 'JSON') returns Str
+{
+    my Str $json = to-json(@e);
+}
+
+multi sub remarshal(%e, 'HASH', 'JSON') returns Str
+{
+    my Str $json = to-json(%e);
+}
+
+multi sub remarshal(Str $json, 'JSON', 'HASH') returns Array
+{
+    my @e = from-json($json);
+}
+
+# --- end hash ↔ json }}}
+# ------------------------------------------------------------------------------
+# --- txn ↔ hash {{{
+
+multi sub remarshal(Str $txn, 'TXN', 'HASH') returns Array
+{
+    my TXN::Parser::AST::Entry @entry = remarshal($txn, 'TXN', 'ENTRY');
+    my @e = remarshal(@entry, 'ENTRY', 'HASH');
+}
+
+multi sub remarshal(@e, 'HASH', 'TXN') returns Str
+{
+    my TXN::Parser::AST::Entry @entry = remarshal(@e, 'HASH', 'ENTRY');
+    my Str $txn = remarshal(@entry, 'ENTRY', 'TXN');
+}
+
+# --- end txn ↔ hash }}}
+# --- txn ↔ json {{{
+
+multi sub remarshal(Str $txn, 'TXN', 'JSON') returns Str
+{
+    my TXN::Parser::AST::Entry @entry = remarshal($txn, 'TXN', 'ENTRY');
+    my @e = remarshal(@entry, 'ENTRY', 'HASH');
+    my Str $json = remarshal(@e, 'HASH', 'JSON');
+}
+
+multi sub remarshal(Str $json, 'JSON', 'TXN') returns Str
+{
+    my @e = remarshal($json, 'JSON', 'HASH');
+    my TXN::Parser::AST::Entry @entry = remarshal(@e, 'HASH', 'ENTRY');
+    my Str $txn = remarshal(@entry, 'ENTRY', 'TXN');
+}
+
+# --- end txn ↔ json }}}
+# ------------------------------------------------------------------------------
+# --- entry ↔ json {{{
+
+multi sub remarshal(TXN::Parser::AST::Entry @entry, 'ENTRY', 'JSON') returns Str
+{
+    my @e = remarshal(@entry, 'ENTRY', 'HASH');
+    my Str $json = remarshal(@e, 'HASH', 'JSON');
+}
+
+multi sub remarshal(TXN::Parser::AST::Entry $entry, 'ENTRY', 'JSON') returns Str
+{
+    my %e = remarshal($entry, 'ENTRY', 'HASH');
+    my Str $json = remarshal(%e, 'HASH', 'JSON');
+}
+
+# --- end entry ↔ json }}}
+# ------------------------------------------------------------------------------
+
+# end remarshal }}}
+
 # txn ↔ entry
 # sub from-txn {{{
 
@@ -191,16 +344,15 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Lot $lot) returns Str
     my Str $name = $lot.name;
     my DecInc $decinc = $lot.decinc;
 
-    my Str $s = '';
-    given $decinc
+    my Str $s = do given $decinc
     {
         when DEC
         {
-            $s ~= '←';
+            '←';
         }
         when INC
         {
-            $s ~= '→';
+            '→';
         }
     }
     $s ~= ' [' ~ to-txn(:$name) ~ ']';
@@ -308,7 +460,7 @@ multi sub to-txn(Str :$tag!) returns Str
 
 # --- Entry {{{
 
-multi sub from-hash(:@entry!) returns Array[TXN::Parser::AST::Entry]
+multi sub from-hash(:@entry!) returns Array
 {
     my TXN::Parser::AST::Entry @e = @entry.map({ from-hash(:entry($_)) });
 }
@@ -389,7 +541,7 @@ multi sub from-hash(
 # --- end Entry::ID }}}
 # --- Entry::Posting {{{
 
-multi sub from-hash(:@posting!) returns Array[TXN::Parser::AST::Entry::Posting]
+multi sub from-hash(:@posting!) returns Array
 {
     my TXN::Parser::AST::Entry::Posting @p =
         @posting.map({ from-hash(:posting($_)) });
@@ -590,5 +742,45 @@ multi sub from-hash(
 # --- end Entry::Posting::ID }}}
 
 # end sub from-hash }}}
+# sub to-hash {{{
+
+# --- Entry {{{
+
+multi sub to-hash(TXN::Parser::AST::Entry @entry) returns Array
+{
+    my @a = @entry.map({ to-hash($_) });
+}
+
+multi sub to-hash(TXN::Parser::AST::Entry $entry) returns Hash
+{
+    $entry.hash;
+}
+
+# --- end Entry }}}
+
+# end sub to-hash }}}
+
+# hash ↔ json
+# sub from-json {{{
+
+sub from-json(Str $json) returns Array
+{
+    Rakudo::Internals::JSON.from-json($json).Array;
+}
+
+# end sub from-json }}}
+# sub to-json {{{
+
+multi sub to-json(@entry) returns Str
+{
+    Rakudo::Internals::JSON.to-json(@entry);
+}
+
+multi sub to-json(%entry) returns Str
+{
+    Rakudo::Internals::JSON.to-json(%entry);
+}
+
+# end sub to-json }}}
 
 # vim: set filetype=perl6 foldmethod=marker foldlevel=0:

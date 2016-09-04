@@ -4,6 +4,7 @@
 
 
 use v6;
+use File::Presence;
 use TXN::Remarshal;
 
 
@@ -15,15 +16,45 @@ use TXN::Remarshal;
 
 sub MAIN(
     Str :i(:$input),
-    Str :if(:$input-format),
     Str :o(:$output),
+    Str :if(:$input-format),
     Str :of(:$output-format)
 )
 {
-    say 'i: ', $input;
-    say 'if: ', $input-format;
-    say 'o: ', $output;
-    say 'of: ', $output-format;
+    my Str $content = do given $input
+    {
+        when '-'
+        {
+            $*IN.lines.join("\n");
+        }
+        when Str:D
+        {
+            die unless exists-readable-file($_);
+            .IO.slurp;
+        }
+        default
+        {
+            $*IN.lines.join("\n");
+        }
+    }
+
+    my Str $remarshal = remarshal($content, :$input-format, :$output-format);
+
+    given $output
+    {
+        when '-'
+        {
+            say $remarshal.trim;
+        }
+        when Str:D
+        {
+            .IO.spurt($remarshal, :createonly);
+        }
+        default
+        {
+            say $remarshal.trim;
+        }
+    }
 }
 
 

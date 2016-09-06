@@ -5,6 +5,7 @@
 
 use v6;
 use File::Presence;
+use TXN::Parser;
 use TXN::Remarshal;
 
 
@@ -14,47 +15,61 @@ use TXN::Remarshal;
 # main
 # -----------------------------------------------------------------------------
 
-sub MAIN(
+# input is from file
+multi sub MAIN(
+    Str:D :i(:$input) where *.chars > 0,
+    Str :o(:$output),
+    Str:D :if(:$input-format) where /:i json/,
+    Str:D :of(:$output-format) where /:i txn/
+)
+{
+    die unless exists-readable-file($input);
+    my @e = remarshal(slurp($input), :if<json>, :of<hash>);
+    my TXN::Parser::AST::Entry @entry = remarshal(@e, :if<hash>, :of<entry>);
+    my Str $txn = remarshal(@entry, :if<entry>, :of<txn>);
+    output($txn, $output);
+}
+
+multi sub MAIN(
+    Str:D :i(:$input) where *.chars > 0,
+    Str :o(:$output),
+    Str:D :if(:$input-format) where /:i txn/,
+    Str:D :of(:$output-format) where /:i json/
+)
+{
+    die unless exists-readable-file($input);
+    my TXN::Parser::AST::Entry @entry = from-txn(:file($input));
+    my @e = remarshal(@entry, :if<entry>, :of<hash>);
+    my Str $json = remarshal(@e, :if<hash>, :of<json>);
+    output($json, $output);
+}
+
+# input is not from file
+multi sub MAIN(
     Str :i(:$input),
     Str :o(:$output),
     Str :if(:$input-format),
     Str :of(:$output-format)
 )
 {
-    my Str $content = do given $input
-    {
-        when '-'
-        {
-            $*IN.lines.join("\n");
-        }
-        when Str:D
-        {
-            die unless exists-readable-file($_);
-            .IO.slurp;
-        }
-        default
-        {
-            $*IN.lines.join("\n");
-        }
-    }
+    my Str $remarshal =
+        remarshal($*IN.lines.join("\n"), :$input-format, :$output-format);
+    output($remarshal, $output);
+}
 
-    my Str $remarshal = remarshal($content, :$input-format, :$output-format);
+multi sub output(Str $remarshal, '-')
+{
+    say $remarshal.trim;
+}
 
-    given $output
-    {
-        when '-'
-        {
-            say $remarshal.trim;
-        }
-        when Str:D
-        {
-            .IO.spurt($remarshal, :createonly);
-        }
-        default
-        {
-            say $remarshal.trim;
-        }
-    }
+multi sub output(Str $remarshal, Str:D $output where *.chars > 0)
+{
+    $output.IO.spurt($remarshal, :createonly);
+}
+
+multi sub output(Str $remarshal, Str $?)
+{
+    say $remarshal.trim;
 }
 
 

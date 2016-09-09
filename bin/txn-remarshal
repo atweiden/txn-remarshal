@@ -17,7 +17,7 @@ use TXN::Remarshal;
 
 # input is from file
 multi sub MAIN(
-    Str:D :i(:$input) where *.chars > 0,
+    Str:D :i(:$input) where *.so,
     Str :o(:$output),
     Str:D :if(:$input-format) where /:i json/,
     Str:D :of(:$output-format) where /:i txn/
@@ -31,7 +31,7 @@ multi sub MAIN(
 }
 
 multi sub MAIN(
-    Str:D :i(:$input) where *.chars > 0,
+    Str:D :i(:$input) where *.so,
     Str :o(:$output),
     Str:D :if(:$input-format) where /:i txn/,
     Str:D :of(:$output-format) where /:i json/
@@ -62,7 +62,7 @@ multi sub output(Str $remarshal, '-')
     say $remarshal.trim;
 }
 
-multi sub output(Str $remarshal, Str:D $output where *.chars > 0)
+multi sub output(Str $remarshal, Str:D $output where *.so)
 {
     $output.IO.spurt($remarshal, :createonly);
 }

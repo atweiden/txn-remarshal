@@ -108,7 +108,7 @@ multi sub output(Str $remarshal, Str $?)
 
 sub resolve-path(Str $path) returns Str
 {
-    ~$path.subst(/^'~'/, $*HOME).IO.resolve;
+    ~$path.subst(/^'~/'/, $*HOME ~ '/').IO.resolve;
 }
 
 

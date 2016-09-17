@@ -43,12 +43,20 @@ multi sub remarshal(Str:D $txn, 'TXN', 'ENTRY') returns Array:D
     my TXN::Parser::AST::Entry:D @entry = from-txn($txn);
 }
 
-multi sub remarshal(TXN::Parser::AST::Entry:D @entry, 'ENTRY', 'TXN') returns Str:D
+multi sub remarshal(
+    TXN::Parser::AST::Entry:D @entry,
+    'ENTRY',
+    'TXN'
+) returns Str:D
 {
     my Str:D $txn = to-txn(@entry);
 }
 
-multi sub remarshal(TXN::Parser::AST::Entry:D $entry, 'ENTRY', 'TXN') returns Str:D
+multi sub remarshal(
+    TXN::Parser::AST::Entry:D $entry,
+    'ENTRY',
+    'TXN'
+) returns Str:D
 {
     my Str:D $txn = to-txn($entry);
 }
@@ -139,13 +147,21 @@ multi sub remarshal(Str:D $json, 'JSON', 'TXN') returns Str:D
 # ------------------------------------------------------------------------------
 # --- entry ↔ json {{{
 
-multi sub remarshal(TXN::Parser::AST::Entry:D @entry, 'ENTRY', 'JSON') returns Str:D
+multi sub remarshal(
+    TXN::Parser::AST::Entry:D @entry,
+    'ENTRY',
+    'JSON'
+) returns Str:D
 {
     my @e = remarshal(@entry, 'ENTRY', 'HASH');
     my Str:D $json = remarshal(@e, 'HASH', 'JSON');
 }
 
-multi sub remarshal(TXN::Parser::AST::Entry:D $entry, 'ENTRY', 'JSON') returns Str:D
+multi sub remarshal(
+    TXN::Parser::AST::Entry:D $entry,
+    'ENTRY',
+    'JSON'
+) returns Str:D
 {
     my %e = remarshal($entry, 'ENTRY', 'HASH');
     my Str:D $json = remarshal(%e, 'HASH', 'JSON');
@@ -162,8 +178,8 @@ multi sub remarshal(TXN::Parser::AST::Entry:D $entry, 'ENTRY', 'JSON') returns S
 multi sub from-txn(
     Str:D $content,
     *%opts (
-        Str :$txn-dir,
-        Int :$date-local-offset
+        Str :txn-dir($),
+        Int :date-local-offset($)
     )
 ) is export returns Array:D
 {
@@ -174,8 +190,8 @@ multi sub from-txn(
 multi sub from-txn(
     Str:D :$file! where *.so,
     *%opts (
-        Str :$txn-dir,
-        Int :$date-local-offset
+        Str :txn-dir($),
+        Int :date-local-offset($)
     )
 ) is export returns Array:D
 {
@@ -269,7 +285,9 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting:D $posting) returns Str:D
 # --- end Entry::Posting }}}
 # --- Entry::Posting::Account {{{
 
-multi sub to-txn(TXN::Parser::AST::Entry::Posting::Account:D $account) returns Str:D
+multi sub to-txn(
+    TXN::Parser::AST::Entry::Posting::Account:D $account
+) returns Str:D
 {
     my Silo:D $silo = $account.silo;
     my VarName:D $entity = $account.entity;
@@ -283,12 +301,16 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Account:D $account) returns S
 # --- end Entry::Posting::Account }}}
 # --- Entry::Posting::Amount {{{
 
-multi sub to-txn(TXN::Parser::AST::Entry::Posting::Amount:D $amount) returns Str:D
+multi sub to-txn(
+    TXN::Parser::AST::Entry::Posting::Amount:D $amount
+) returns Str:D
 {
     my AssetCode:D $asset-code = $amount.asset-code;
     my Quantity:D $asset-quantity = $amount.asset-quantity;
-    my AssetSymbol:D $asset-symbol = $amount.asset-symbol if $amount.asset-symbol;
-    my PlusMinus:D $plus-or-minus = $amount.plus-or-minus if $amount.plus-or-minus;
+    my AssetSymbol:D $asset-symbol = $amount.asset-symbol
+        if $amount.asset-symbol;
+    my PlusMinus:D $plus-or-minus = $amount.plus-or-minus
+        if $amount.plus-or-minus;
 
     my Str:D $s = '';
     $s ~= $plus-or-minus if $plus-or-minus;
@@ -323,11 +345,14 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot:D $annot) returns Str:D
 # --- end Entry::Posting::Annot }}}
 # --- Entry::Posting::Annot::Inherit {{{
 
-multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Inherit:D $inherit) returns Str:D
+multi sub to-txn(
+    TXN::Parser::AST::Entry::Posting::Annot::Inherit:D $inherit
+) returns Str:D
 {
     my AssetCode:D $asset-code = $inherit.asset-code;
     my Quantity:D $asset-quantity = $inherit.asset-quantity;
-    my AssetSymbol:D $asset-symbol = $inherit.asset-symbol if $inherit.asset-symbol;
+    my AssetSymbol:D $asset-symbol = $inherit.asset-symbol
+        if $inherit.asset-symbol;
 
     my Str:D $s = '« ';
     $s ~= $asset-symbol if $asset-symbol;
@@ -339,7 +364,9 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Inherit:D $inherit) re
 # --- end Entry::Posting::Annot::Inherit }}}
 # --- Entry::Posting::Annot::Lot {{{
 
-multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Lot:D $lot) returns Str:D
+multi sub to-txn(
+    TXN::Parser::AST::Entry::Posting::Annot::Lot:D $lot
+) returns Str:D
 {
     my VarName:D $name = $lot.name;
     my DecInc:D $decinc = $lot.decinc;
@@ -362,7 +389,9 @@ multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::Lot:D $lot) returns St
 # --- end Entry::Posting::Annot::Lot }}}
 # --- Entry::Posting::Annot::XE {{{
 
-multi sub to-txn(TXN::Parser::AST::Entry::Posting::Annot::XE:D $xe) returns Str:D
+multi sub to-txn(
+    TXN::Parser::AST::Entry::Posting::Annot::XE:D $xe
+) returns Str:D
 {
     my AssetCode:D $asset-code = $xe.asset-code;
     my Quantity:D $asset-quantity = $xe.asset-quantity;

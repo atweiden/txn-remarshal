@@ -17,9 +17,9 @@ use TXN::Remarshal;
 
 # input is from JSON stdin
 multi sub MAIN(
-    Str:D :i(:$input) where '-',
-    Str:D :if(:$input-format) where /:i json/,
-    Str:D :of(:$output-format) where /:i txn/,
+    Str:D :i(:input($)) where '-',
+    Str:D :if(:input-format($)) where /:i json/,
+    Str:D :of(:output-format($)) where /:i txn/,
     Str :o(:$output)
 )
 {
@@ -32,8 +32,8 @@ multi sub MAIN(
 # input is from JSON file
 multi sub MAIN(
     Str:D :i(:$input) where *.so,
-    Str:D :if(:$input-format) where /:i json/,
-    Str:D :of(:$output-format) where /:i txn/,
+    Str:D :if(:input-format($)) where /:i json/,
+    Str:D :of(:output-format($)) where /:i txn/,
     Str :o(:$output)
 )
 {
@@ -47,9 +47,9 @@ multi sub MAIN(
 
 # input is from TXN stdin
 multi sub MAIN(
-    Str:D :i(:$input) where '-',
-    Str:D :if(:$input-format) where /:i txn/,
-    Str:D :of(:$output-format) where /:i json/,
+    Str:D :i(:input($)) where '-',
+    Str:D :if(:input-format($)) where /:i txn/,
+    Str:D :of(:output-format($)) where /:i json/,
     Str :o(:$output)
 )
 {
@@ -62,8 +62,8 @@ multi sub MAIN(
 # input is from TXN file
 multi sub MAIN(
     Str:D :i(:$input) where *.so,
-    Str:D :if(:$input-format) where /:i txn/,
-    Str:D :of(:$output-format) where /:i json/,
+    Str:D :if(:input-format($)) where /:i txn/,
+    Str:D :of(:output-format($)) where /:i json/,
     Str :o(:$output)
 )
 {
@@ -77,7 +77,7 @@ multi sub MAIN(
 
 # input is from stdin
 multi sub MAIN(
-    Str :i(:$input),
+    Str :i(:input($)),
     Str :o(:$output),
     Str :if(:$input-format),
     Str :of(:$output-format)

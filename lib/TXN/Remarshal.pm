@@ -350,13 +350,13 @@ multi sub to-txn(
 ) returns Str:D
 {
     my AssetCode:D $asset-code = $inherit.asset-code;
-    my Quantity:D $asset-quantity = $inherit.asset-quantity;
+    my Price:D $asset-price = $inherit.asset-price;
     my AssetSymbol:D $asset-symbol = $inherit.asset-symbol
         if $inherit.asset-symbol;
 
     my Str:D $s = '« ';
     $s ~= $asset-symbol if $asset-symbol;
-    $s ~= $asset-quantity;
+    $s ~= $asset-price;
     $s ~= ' ' ~ $asset-code;
     $s;
 }
@@ -394,12 +394,12 @@ multi sub to-txn(
 ) returns Str:D
 {
     my AssetCode:D $asset-code = $xe.asset-code;
-    my Quantity:D $asset-quantity = $xe.asset-quantity;
+    my Price:D $asset-price = $xe.asset-price;
     my AssetSymbol:D $asset-symbol = $xe.asset-symbol if $xe.asset-symbol;
 
     my Str:D $s = '@ ';
     $s ~= $asset-symbol if $asset-symbol;
-    $s ~= $asset-quantity;
+    $s ~= $asset-price;
     $s ~= ' ' ~ $asset-code;
     $s;
 }
@@ -601,7 +601,7 @@ multi sub from-hash(:%annot!) returns TXN::Parser::AST::Entry::Posting::Annot:D
 multi sub from-hash(
     :%inherit! (
         :$asset-code!,
-        :$asset-quantity!,
+        :$asset-price!,
         :$asset-symbol
     )
 ) returns TXN::Parser::AST::Entry::Posting::Annot::Inherit:D
@@ -609,11 +609,11 @@ multi sub from-hash(
     my %i;
 
     my AssetCode:D $c = $asset-code;
-    my Quantity:D $q = FatRat($asset-quantity);
+    my Price:D $p = FatRat($asset-price);
     my AssetSymbol:D $s = $asset-symbol if $asset-symbol;
 
     %i<asset-code> = $c;
-    %i<asset-quantity> = $q;
+    %i<asset-price> = $p;
     %i<asset-symbol> = $s if $s;
 
     TXN::Parser::AST::Entry::Posting::Annot::Inherit.new(|%i);
@@ -646,7 +646,7 @@ multi sub from-hash(
 multi sub from-hash(
     :%xe! (
         :$asset-code!,
-        :$asset-quantity!,
+        :$asset-price!,
         :$asset-symbol
     )
 ) returns TXN::Parser::AST::Entry::Posting::Annot::XE:D
@@ -654,11 +654,11 @@ multi sub from-hash(
     my %x;
 
     my AssetCode:D $c = $asset-code;
-    my Quantity:D $q = FatRat($asset-quantity);
+    my Price:D $p = FatRat($asset-price);
     my AssetSymbol:D $s = $asset-symbol if $asset-symbol;
 
     %x<asset-code> = $c;
-    %x<asset-quantity> = $q;
+    %x<asset-price> = $p;
     %x<asset-symbol> = $s if $s;
 
     TXN::Parser::AST::Entry::Posting::Annot::XE.new(|%x);

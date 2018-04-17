@@ -105,7 +105,7 @@ multi sub output(Str:D $remarshal, '-' --> Nil)
 # output is to file
 multi sub output(Str:D $remarshal, Str:D $output where .so --> Nil)
 {
-    spurt($output, $remarshal, :createonly);
+    spurt($output, $remarshal);
 }
 
 # output is to stdout (default)

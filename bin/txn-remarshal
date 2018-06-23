@@ -42,7 +42,7 @@ multi sub MAIN(
 )
 {
     my Str:D $file = ~File::Path::Resolve.absolute($input);
-    exists-readable-file($file)
+    File::Presence.exists-readable-file($file)
         or die;
     my %ledger = remarshal(slurp($file), :if<json>, :of<hash>);
     my Ledger:D $ledger = remarshal(%ledger, :if<hash>, :of<ledger>);

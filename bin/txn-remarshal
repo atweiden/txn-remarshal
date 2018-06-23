@@ -75,7 +75,7 @@ multi sub MAIN(
 )
 {
     my Str:D $file = ~File::Path::Resolve.absolute($input);
-    exists-readable-file($file)
+    File::Presence.exists-readable-file($file)
         or die;
     my Ledger:D $ledger = from-txn(:$file);
     my %ledger = remarshal($ledger, :if<ledger>, :of<hash>);

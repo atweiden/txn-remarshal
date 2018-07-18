@@ -9,10 +9,10 @@ unit module TXN::Remarshal;
 # --- format {{{
 
 subset Format of Str where /HASH|JSON|LEDGER|TXN/;
-multi sub gen-format('hash'   --> Format:D) { 'HASH' }
-multi sub gen-format('json'   --> Format:D) { 'JSON' }
-multi sub gen-format('ledger' --> Format:D) { 'LEDGER' }
-multi sub gen-format('txn'    --> Format:D) { 'TXN' }
+multi sub gen-format('hash'   --> Format:D) { my Format:D $format = 'HASH' }
+multi sub gen-format('json'   --> Format:D) { my Format:D $format = 'JSON' }
+multi sub gen-format('ledger' --> Format:D) { my Format:D $format = 'LEDGER' }
+multi sub gen-format('txn'    --> Format:D) { my Format:D $format = 'TXN' }
 
 # --- end format }}}
 

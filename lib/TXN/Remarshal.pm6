@@ -178,7 +178,7 @@ multi sub from-txn(
 multi sub to-txn(Ledger:D $ledger --> Str:D) is export
 {
     my Entry:D @entry = $ledger.entry;
-    my Str:D $s = to-txn(@entry);
+    my Str:D $txn = to-txn(@entry);
 }
 
 # --- end Ledger }}}
@@ -186,15 +186,14 @@ multi sub to-txn(Ledger:D $ledger --> Str:D) is export
 
 multi sub to-txn(Entry:D @entry --> Str:D) is export
 {
-    my Str:D $s = @entry.map({ .&to-txn }).join("\n" x 2);
+    my Str:D $txn = @entry.map({ .&to-txn }).join("\n" x 2);
 }
 
 multi sub to-txn(Entry:D $entry --> Str:D) is export
 {
     my Entry::Header:D $header = $entry.header;
     my Entry::Posting:D @posting = $entry.posting;
-    my Str:D $s = join("\n", to-txn($header), to-txn(@posting));
-    $s;
+    my Str:D $txn = join("\n", to-txn($header), to-txn(@posting));
 }
 
 # --- end Entry }}}
@@ -221,7 +220,7 @@ multi sub to-txn(Entry::Header:D $header --> Str:D)
         $s ~= "\n" ~ $d;
     }
 
-    $s.trim;
+    my Str:D $txn = $s.trim;
 }
 
 # --- end Entry::Header }}}
@@ -229,7 +228,7 @@ multi sub to-txn(Entry::Header:D $header --> Str:D)
 
 multi sub to-txn(Entry::Posting:D @posting --> Str:D)
 {
-    @posting.map({ .&to-txn }).join("\n");
+    my Str:D $txn = @posting.map({ .&to-txn }).join("\n");
 }
 
 multi sub to-txn(Entry::Posting:D $posting --> Str:D)
@@ -254,7 +253,7 @@ multi sub to-txn(Entry::Posting:D $posting --> Str:D)
 
     $s ~= to-txn($amount);
     $s ~= ' ' ~ to-txn($annot) if $annot;
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting }}}
@@ -271,7 +270,7 @@ multi sub to-txn(
 
     my Str:D $s = $silo.gist.tclc ~ ':' ~ $entity;
     $s ~= ':' ~ @path.join(':') if @path;
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting::Account }}}
@@ -294,7 +293,7 @@ multi sub to-txn(
     $s ~= $asset-symbol if $asset-symbol;
     $s ~= $asset-quantity;
     $s ~= ' ' ~ $asset-code;
-    $s;
+    my Str:D $txn = $s;
 }
 
 multi sub to-txn(
@@ -313,7 +312,7 @@ multi sub to-txn(
     $s ~= $asset-quantity;
     $s ~= ' ' ~ $unit-of-measure ~ ' of';
     $s ~= ' ' ~ $asset-code;
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- Entry::Posting::Amount }}}
@@ -335,7 +334,7 @@ multi sub to-txn(Entry::Posting::Annot:D $annot --> Str:D)
 
     my Str:D $s = '';
     $s ~= join(' ', @a);
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting::Annot }}}
@@ -355,7 +354,7 @@ multi sub to-txn(
     $s ~= $asset-symbol if $asset-symbol;
     $s ~= $asset-price;
     $s ~= ' ' ~ $asset-code;
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting::Annot::Inherit }}}
@@ -374,7 +373,7 @@ multi sub to-txn(
         when INC { '→' }
     }
     $s ~= ' [' ~ $name ~ ']';
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting::Annot::Lot }}}
@@ -393,7 +392,7 @@ multi sub to-txn(
     $s ~= $asset-symbol if $asset-symbol;
     $s ~= $asset-price;
     $s ~= ' ' ~ $asset-code;
-    $s;
+    my Str:D $txn = $s;
 }
 
 # --- end Entry::Posting::Annot::XE }}}
@@ -408,7 +407,7 @@ multi sub to-txn(
 multi sub from-hash(:ledger(%)! (:@entry!) --> Ledger:D)
 {
     my Entry:D @e = from-hash(:@entry);
-    Ledger.new(:entry(@e));
+    my Ledger $ledger .= new(:entry(@e));
 }
 
 # --- end Ledger }}}
@@ -438,7 +437,7 @@ multi sub from-hash(
     %entry<id> = $entry-idʹ;
     %entry<posting> = @postingʹ;
 
-    Entry.new(|%entry);
+    my Entry $entry .= new(|%entry);
 }
 
 # --- end Entry }}}
@@ -467,7 +466,7 @@ multi sub from-hash(
     %header<description> = $descriptionʹ if $descriptionʹ;
     %header<important> = $importantʹ if $importantʹ;
 
-    Entry::Header.new(|%header, :tag(@tagʹ));
+    my Entry::Header $header .= new(|%header, :tag(@tagʹ));
 }
 
 # --- end Entry::Header }}}
@@ -492,7 +491,7 @@ multi sub from-hash(
     %entry-id<xxhash> = $xxhashʹ;
 
     # XXX text → xxhash not checked
-    Entry::ID.new(|%entry-id, :number(@numberʹ));
+    my Entry::ID $id .= new(|%entry-id, :number(@numberʹ));
 }
 
 # --- end Entry::ID }}}
@@ -529,7 +528,7 @@ multi sub from-hash(
     %posting<id> = $posting-idʹ;
     %posting<decinc> = $decincʹ;
 
-    Entry::Posting.new(|%posting);
+    my Entry::Posting $posting .= new(|%posting);
 }
 
 # --- end Entry::Posting }}}
@@ -553,7 +552,7 @@ multi sub from-hash(
     %account<silo> = $siloʹ;
     %account<entity> = $entityʹ;
 
-    Entry::Posting::Account.new(|%account, :path(@pathʹ));
+    my Entry::Posting::Account $account .= new(|%account, :path(@pathʹ));
 }
 
 # --- end Entry::Posting::Account }}}
@@ -581,7 +580,7 @@ multi sub from-hash(
     %amount<asset-symbol> = $asset-symbolʹ if $asset-symbolʹ;
     %amount<plus-or-minus> = $plus-or-minusʹ if $plus-or-minusʹ;
 
-    Entry::Posting::Amount.new(|%amount);
+    my Entry::Posting::Amount $amount .= new(|%amount);
 }
 
 # --- end Entry::Posting::Amount }}}
@@ -609,7 +608,7 @@ multi sub from-hash(
     %annot<lot> = $lotʹ if $lotʹ;
     %annot<xe> = $xeʹ if $xeʹ;
 
-    Entry::Posting::Annot.new(|%annot);
+    my Entry::Posting::Annot $annot .= new(|%annot);
 }
 
 # --- end Entry::Posting::Annot }}}
@@ -634,7 +633,7 @@ multi sub from-hash(
     %inherit<asset-price> = $asset-priceʹ;
     %inherit<asset-symbol> = $asset-symbolʹ if $asset-symbolʹ;
 
-    Entry::Posting::Annot::Inherit.new(|%inherit);
+    my Entry::Posting::Annot::Inherit $inherit .= new(|%inherit);
 }
 
 # --- end Entry::Posting::Annot::Inherit }}}
@@ -656,7 +655,7 @@ multi sub from-hash(
     %lot<decinc> = $decincʹ;
     %lot<name> = $nameʹ;
 
-    Entry::Posting::Annot::Lot.new(|%lot);
+    my Entry::Posting::Annot::Lot $lot .= new(|%lot);
 }
 
 # --- end Entry::Posting::Annot::Lot }}}
@@ -681,7 +680,7 @@ multi sub from-hash(
     %xe<asset-price> = $asset-priceʹ;
     %xe<asset-symbol> = $asset-symbolʹ if $asset-symbolʹ;
 
-    Entry::Posting::Annot::XE.new(|%xe);
+    my Entry::Posting::Annot::XE $xe .= new(|%xe);
 }
 
 # --- end Entry::Posting::Annot::XE }}}
@@ -710,7 +709,7 @@ multi sub from-hash(
     %posting-id<text> = $textʹ;
     %posting-id<xxhash> = $xxhashʹ;
 
-    Entry::Posting::ID.new(|%posting-id);
+    my Entry::Posting::ID $id .= new(|%posting-id);
 }
 
 # --- end Entry::Posting::ID }}}
@@ -722,7 +721,7 @@ multi sub from-hash(
 
 multi sub to-hash(Ledger:D $ledger --> Hash:D)
 {
-    $ledger.hash;
+    my %ledger = $ledger.hash;
 }
 
 # --- end Ledger }}}
@@ -742,7 +741,7 @@ sub from-json(Str:D $json --> Hash:D)
 
 multi sub to-json(%ledger --> Str:D)
 {
-    Rakudo::Internals::JSON.to-json(%ledger);
+    my Str:D $json = Rakudo::Internals::JSON.to-json(%ledger);
 }
 
 # end sub to-json }}}

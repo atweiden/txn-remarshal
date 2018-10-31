@@ -562,10 +562,35 @@ multi sub from-hash(
     :amount(%)! (
         :$asset-code!,
         :$asset-quantity!,
+        :$unit-of-measure!,
+        :$plus-or-minus
+    )
+    --> Entry::Posting::Amount[COMMODITY]
+)
+{
+    my %amount;
+
+    my AssetCode:D $asset-codeʹ = $asset-code;
+    my Quantity:D $asset-quantityʹ = Rat($asset-quantity);
+    my UnitOfMeasure:D $unit-of-measureʹ = $unit-of-measure;
+    my PlusMinus:D $plus-or-minusʹ = $plus-or-minus if $plus-or-minus;
+
+    %amount<asset-code> = $asset-codeʹ;
+    %amount<asset-quantity> = $asset-quantityʹ;
+    %amount<unit-of-measure> = $unit-of-measureʹ;
+    %amount<plus-or-minus> = $plus-or-minusʹ if $plus-or-minusʹ;
+
+    my Entry::Posting::Amount[COMMODITY] $amount .= new(|%amount);
+}
+
+multi sub from-hash(
+    :amount(%)! (
+        :$asset-code!,
+        :$asset-quantity!,
         :$asset-symbol,
         :$plus-or-minus
     )
-    --> Entry::Posting::Amount:D
+    --> Entry::Posting::Amount[ASSET]
 )
 {
     my %amount;
@@ -580,7 +605,7 @@ multi sub from-hash(
     %amount<asset-symbol> = $asset-symbolʹ if $asset-symbolʹ;
     %amount<plus-or-minus> = $plus-or-minusʹ if $plus-or-minusʹ;
 
-    my Entry::Posting::Amount $amount .= new(|%amount);
+    my Entry::Posting::Amount[ASSET] $amount .= new(|%amount);
 }
 
 # --- end Entry::Posting::Amount }}}

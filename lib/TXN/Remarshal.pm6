@@ -413,7 +413,7 @@ multi sub from-hash(:ledger(%)! (:@entry!) --> Ledger:D)
 # --- end Ledger }}}
 # --- Entry {{{
 
-multi sub from-hash(:@entry! --> Array:D)
+multi sub from-hash(:@entry! --> Array[Entry:D])
 {
     my Entry:D @e = @entry.map(-> %entry { from-hash(:%entry) });
 }
@@ -497,7 +497,7 @@ multi sub from-hash(
 # --- end Entry::ID }}}
 # --- Entry::Posting {{{
 
-multi sub from-hash(:@posting! --> Array:D)
+multi sub from-hash(:@posting! --> Array[Entry::Posting:D])
 {
     my Entry::Posting:D @p = @posting.map(-> %posting { from-hash(:%posting) });
 }

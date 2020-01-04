@@ -19,7 +19,7 @@ read TXN from `sample.txn`, write JSON to `sample.json`:
 txn-remarshal -i=sample.txn -if=txn -of=json -o=sample.json
 ```
 
-**perl6**
+**raku**
 
 ```perl6
 use TXN::Parser::ParseTree;
@@ -53,7 +53,7 @@ my %ledger = remarshal($json, :if<json>, :of<hash>);
 
 ### Dependencies
 
-- Rakudo Perl 6
+- Raku
 - [File::Path::Resolve](https://github.com/atweiden/file-path-resolve)
 - [File::Presence](https://github.com/atweiden/file-presence)
 - [TXN::Parser](https://github.com/atweiden/txn-parser)

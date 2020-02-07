@@ -21,7 +21,7 @@ txn-remarshal -i=sample.txn -if=txn -of=json -o=sample.json
 
 **raku**
 
-```perl6
+```raku
 use TXN::Parser::ParseTree;
 use TXN::Remarshal;
 
@@ -67,7 +67,7 @@ To run the tests:
 ```
 $ git clone https://github.com/atweiden/txn-remarshal && cd txn-remarshal
 $ peru --file=.peru.yml --sync-dir="$PWD" sync
-$ PERL6LIB=lib prove -r -e perl6
+$ PERL6LIB=lib prove -r -e raku
 ```
 
 

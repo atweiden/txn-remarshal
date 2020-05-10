@@ -67,7 +67,7 @@ To run the tests:
 ```
 $ git clone https://github.com/atweiden/txn-remarshal && cd txn-remarshal
 $ peru --file=.peru.yml --sync-dir="$PWD" sync
-$ RAKUDOLIB=lib prove -r -e raku
+$ RAKULIB=lib prove -r -e raku
 ```
 
 
